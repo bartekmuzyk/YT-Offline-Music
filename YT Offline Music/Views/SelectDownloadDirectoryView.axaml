@@ -2,7 +2,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:YT_Offline_Music.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="YT_Offline_Music.Views.SelectDownloadDirectoryView">
-    Welcome to Avalonia!
+    <Design.DataContext>
+        <vm:SelectDownloadDirectoryViewModel />
+    </Design.DataContext>
+    
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <materialIcons:MaterialIcon Kind="FolderDownload" Width="130" Height="130" Foreground="#ccc" />
+        <TextBlock FontWeight="Black" FontSize="40" HorizontalAlignment="Center">Folder z pobranymi</TextBlock>
+        <TextBlock HorizontalAlignment="Center">
+            Wybierz folder, w którym będą zapisywane piosenki z playlist. Można to zmienić później.
+        </TextBlock>
+        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+            <TextBox Width="350" IsReadOnly="True" Text="{Binding SelectedPath}" />
+            <Button Classes="Accent" Width="50" Height="35" Margin="10,0,0,0" Click="OnChooseButtonClick">
+                ...
+            </Button>
+        </StackPanel>
+        <Button
+            HorizontalAlignment="Center"
+            IsEnabled="{Binding ContinueButtonEnabled}"
+            Click="OnContinueButtonClick"
+        >
+            Kontynuuj do aplikacji
+        </Button>
+    </StackPanel>
 </UserControl>

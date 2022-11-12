@@ -17,6 +17,10 @@ namespace YT_Offline_Music
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                #if DEBUG
+                Secrets.Load();
+                #endif
+                
                 desktop.MainWindow = new MainWindow
                 {
                     DataContext = new MainWindowViewModel(),

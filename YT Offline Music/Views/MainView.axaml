@@ -2,7 +2,459 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:YT_Offline_Music.ViewModels"
+             xmlns:cc="using:YT_Offline_Music.CustomControls"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="YT_Offline_Music.Views.MainView">
-    Welcome to Avalonia!
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+    
+    <Canvas>
+        <TabControl
+            Canvas.Left="0"
+            Canvas.Top="0"
+            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=Width}"
+            Height="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=Height}"
+        >
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Vertical">
+                        <materialIcons:MaterialIcon Kind="PlaylistMusic" Width="25" Height="25" />
+                        <TextBlock>Playlisty</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Right" IsVisible="{Binding SelectedPlaylist, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <Border Width="350" Background="#2000" BorderThickness="1,0,0,0" BorderBrush="#1fff">
+                            <DockPanel>
+                                <DockPanel DockPanel.Dock="Top" Margin="5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <cc:WebImage SourceUrl="{Binding SelectedPlaylist.ThumbnailUrl}" Width="100" />
+                                        <StackPanel VerticalAlignment="Center" Margin="5,0,0,0">
+                                            <TextBlock
+                                                Text="{Binding SelectedPlaylist.Title}"
+                                                FontWeight="Bold"
+                                                FontSize="30"
+                                                Width="200"
+                                                TextTrimming="CharacterEllipsis"
+                                            />
+                                            <TextBlock
+                                                Foreground="#9E9E9E"
+                                                Text="{Binding SelectedPlaylist.PlaylistOwner}"
+                                                FontSize="14"
+                                                Width="200"
+                                                TextTrimming="CharacterEllipsis"
+                                            />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Button DockPanel.Dock="Right" Classes="Flat" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                        <materialIcons:MaterialIcon Kind="DotsVertical" />
+                                        <Button.Flyout>
+                                            <Flyout>
+                                                <StackPanel Classes="menuPanel">
+                                                    <Button Classes="Flat" Click="OnForceFtpSyncButtonClick" HorizontalContentAlignment="Left" assists:ButtonAssist.ClickFeedbackColor="#FFC107">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <materialIcons:MaterialIcon Foreground="#FFC107" Kind="FolderSync"/>
+                                                            <TextBlock Foreground="#FFC107">Wymuś synchronizację z serwerem FTP</TextBlock>
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <Button Classes="Flat Accent" Click="OnOpenPlaylistInBrowserButtonClick" HorizontalContentAlignment="Left">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <materialIcons:MaterialIcon Kind="Web"/>
+                                                            <TextBlock>Otwórz stronę playlisty w przeglądarce</TextBlock>
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <Button Classes="Flat" Click="OnDeletePlaylistButtonClick" HorizontalContentAlignment="Left" assists:ButtonAssist.ClickFeedbackColor="#F44336">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <materialIcons:MaterialIcon Foreground="#F44336" Kind="Delete" />
+                                                            <TextBlock Foreground="#F44336">Usuń lokalne dane i piosenki z tej playlisty</TextBlock>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </DockPanel>
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5" HorizontalAlignment="Right">
+                                        <Button Click="OnPlaylistSyncButtonClick" IsEnabled="{Binding !PlaylistActionsLocked}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialIcons:MaterialIcon Kind="Sync" />
+                                                <TextBlock>Synchronizuj</TextBlock>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button
+                                            Name="DownloadPlaylistButton"
+                                            IsEnabled="{Binding !PlaylistActionsLocked}"
+                                            Classes="Accent"
+                                            Margin="8,0,0,0"
+                                            IsVisible="{Binding DisplayedVideos, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            Click="DownloadPlaylistButton_OnClick"
+                                        >
+                                            <Button.Flyout>
+                                                <Flyout Placement="Left" FlyoutPresenterClasses="downloadConfigurationPanel">
+                                                    <StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                            <materialIcons:MaterialIcon Foreground="White" Kind="FileDownload" Width="25" Height="25" Margin="0,0,10,0" />
+                                                            <TextBlock Foreground="White" FontWeight="Bold" FontSize="20">Co pobrać</TextBlock>
+                                                        </StackPanel>
+                                                        <RadioButton GroupName="DownloadMode" IsChecked="{Binding DownloadConfiguration.DownloadAll}">Pobierz wszystkie piosenki od nowa</RadioButton>
+                                                        <RadioButton GroupName="DownloadMode" IsChecked="{Binding DownloadConfiguration.OnlyDownloadNew}">Tylko pobierz nowe piosenki</RadioButton>
+                                                        <RadioButton GroupName="DownloadMode" IsChecked="{Binding DownloadConfiguration.DownloadNewAndDeleteNonExistent}">Pobierz nowe piosenki i usuń nieistniejące</RadioButton>
+                                                        
+                                                        <StackPanel Orientation="Horizontal" Margin="0,15,0,5">
+                                                            <materialIcons:MaterialIcon Foreground="White" Kind="ShareVariant" Width="25" Height="25" Margin="0,0,10,0" />
+                                                            <TextBlock Foreground="White" FontWeight="Bold" FontSize="20">Wyślij na (jeżeli dostępne)</TextBlock>
+                                                        </StackPanel>
+                                                        <CheckBox IsChecked="{Binding DownloadConfiguration.SendViaFtp}">Serwer FTP</CheckBox>
+                                                        <!-- <CheckBox IsChecked="{Binding DownloadConfiguration.SendViaMtp}">Urządzenie MTP</CheckBox> -->
+                                                        
+                                                        <StackPanel Orientation="Horizontal" Margin="0,15,0,5">
+                                                            <materialIcons:MaterialIcon Foreground="White" Kind="AutoFix" Width="25" Height="25" Margin="0,0,10,0" />
+                                                            <TextBlock Foreground="White" FontWeight="Bold" FontSize="20">Dodatkowe operacje</TextBlock>
+                                                        </StackPanel>
+                                                        <CheckBox IsChecked="{Binding DownloadConfiguration.CreateZipArchive}">Spakuj do archiwum .zip</CheckBox>
+                                                        
+                                                        <Border BorderBrush="LightGray" BorderThickness="0,1,0,0" Margin="0,20,0,0">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <CheckBox IsChecked="{Binding RememberDownloadConfig}" VerticalAlignment="Center" Margin="0,0,40,0">Zapamiętaj tę konfigurację</CheckBox>
+                                                                <Button Classes="Outline Accent" Click="OnPlaylistDownloadButtonClick" Margin="0,15,0,0" assists:ButtonAssist.CornerRadius="16">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <materialIcons:MaterialIcon Kind="Play" />
+                                                                        <TextBlock>Rozpocznij</TextBlock>
+                                                                    </StackPanel>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialIcons:MaterialIcon Kind="Download" />
+                                                <TextBlock>Pobierz</TextBlock>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                    <StackPanel
+                                        IsVisible="{Binding DisplayedVideos, Converter={x:Static ObjectConverters.IsNull}}"
+                                        Width="350"
+                                    >
+                                        <materialIcons:MaterialIcon Kind="Sync" HorizontalAlignment="Center" VerticalAlignment="Center" Width="110" Height="110" Foreground="#5fff" />
+                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#5fff" TextWrapping="Wrap" TextAlignment="Center">
+                                            Aby zobaczyć listę piosenek i pobrać playlistę, kliknij przycisk Synchronizuj.
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <ListBox
+                                        IsVisible="{Binding DisplayedVideos, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                        SelectionMode="Single"
+                                        Items="{Binding DisplayedVideos}"
+                                    >
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <cc:WebImage Height="40" SourceUrl="{Binding ThumbnailUrl}" />
+                                                    <StackPanel Orientation="Vertical" Margin="5,0,0,0">
+                                                        <TextBlock Width="240" Text="{Binding Title}" FontSize="13" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Width="240" Text="{Binding Channel}" Foreground="#9E9E9E" FontSize="10" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </DockPanel>
+                            </DockPanel>
+                        </Border>
+                    </DockPanel>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+                            <Button Click="OnAddPlaylistButtonClick">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialIcons:MaterialIcon Kind="Plus" />
+                                    <TextBlock>Dodaj playlistę</TextBlock>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                        <ListBox
+                            SelectionMode="Single"
+                            Items="{Binding Playlists}"
+                            SelectedItem="{Binding SelectedPlaylist}"
+                        >
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <cc:WebImage Height="40" SourceUrl="{Binding ThumbnailUrl}" />
+                                        <StackPanel Orientation="Vertical" Margin="5,0,0,0">
+                                            <TextBlock Text="{Binding Title}" FontSize="19" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding PlaylistOwner}" Foreground="#9E9E9E" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </DockPanel>
+            </TabItem>
+            
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Vertical">
+                        <materialIcons:MaterialIcon Kind="DiscPlayer" Width="25" Height="25" />
+                        <TextBlock>Odtwarzacz</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <materialIcons:MaterialIcon Kind="SignCaution" Width="140" Height="140" />
+                    <TextBlock FontSize="50" HorizontalAlignment="Center" FontWeight="Bold">Jeszcze niedostępne</TextBlock>
+                    <TextBlock HorizontalAlignment="Center">Funkcja nadejdzie wkrótce. Sprawdzaj aktualizacje!</TextBlock>
+                </StackPanel>
+            </TabItem>
+            
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Vertical">
+                        <materialIcons:MaterialIcon Kind="FolderNetwork" Width="25" Height="25" />
+                        <TextBlock>FTP</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <ScrollViewer>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                        <StackPanel>
+                            <materialIcons:MaterialIcon Kind="FolderNetwork" Width="80" Height="80" />
+                            <TextBlock HorizontalAlignment="Center">Wpisz tu dane swojego serwera FTP, aby móc z niego korzystać.</TextBlock>
+                            <TextBox Watermark="Adres serwera" Text="{Binding FtpConfig.Address}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <TextBlock VerticalAlignment="Center" Margin="0,0,10,0" FontSize="20">Port</TextBlock>
+                                <NumericUpDown Height="35" MinHeight="35" Minimum="20" Maximum="99999" Value="{Binding FtpConfig.Port}" />
+                            </StackPanel>
+                            <CheckBox IsChecked="{Binding LoginAnonymouslyToFtp}">Loguj anonimowo</CheckBox>
+                            <TextBox IsVisible="{Binding LoginAnonymouslyToFtp, Converter={x:Static BoolConverters.Not}}" Watermark="Nazwa użytkownika" Text="{Binding FtpConfig.Username}" />
+                            <TextBox IsVisible="{Binding LoginAnonymouslyToFtp, Converter={x:Static BoolConverters.Not}}" PasswordChar="*" Watermark="Hasło" Text="{Binding FtpConfig.Password}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Classes="Accent Flat" Click="OnTestFtpConnectionButtonClick" IsEnabled="{Binding TestingFtpConnectionInProgress, Converter={x:Static BoolConverters.Not}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialIcons:MaterialIcon Kind="Broadcast" />
+                                        <TextBlock IsVisible="{Binding TestingFtpConnectionInProgress, Converter={x:Static BoolConverters.Not}}">Test połączenia</TextBlock>
+                                        <TextBlock IsVisible="{Binding TestingFtpConnectionInProgress}">Testuję...</TextBlock>
+                                    </StackPanel>
+                                </Button>
+                                <Button Click="OnSaveFtpConfigurationButtonClick" Margin="5,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialIcons:MaterialIcon Kind="ContentSave" />
+                                        <TextBlock>Zapisz konfigurację</TextBlock>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                        <Border BorderBrush="LightGray" BorderThickness="1" Padding="10" Margin="40,0,0,0" CornerRadius="16" VerticalAlignment="Top">
+                            <StackPanel>
+                                <materialIcons:MaterialIcon Kind="InfoOutline" Width="30" Height="30" Foreground="LightGray" HorizontalAlignment="Left" />
+                                <TextBlock TextWrapping="Wrap" Width="150" Foreground="LightGray" Margin="0,10,0,0">
+                                    Piosenki będą przenoszone do folderu znajdującego się najwyżej w hierarchii katalogów na serwerze.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
+            <!-- <TabItem> -->
+            <!--     <TabItem.Header> -->
+            <!--         <StackPanel Orientation="Vertical"> -->
+            <!--             <materialIcons:MaterialIcon Kind="Usb" Width="25" Height="25" /> -->
+            <!--             <TextBlock>MTP</TextBlock> -->
+            <!--         </StackPanel> -->
+            <!--     </TabItem.Header> -->
+            <!--     <DockPanel> -->
+            <!--         <DockPanel DockPanel.Dock="Top" IsVisible="{Binding UsedMtpDevice, Converter={x:Static ObjectConverters.IsNull}}"> -->
+            <!--             <Button -->
+            <!--                 DockPanel.Dock="Right" -->
+            <!--                 Margin="10" -->
+            <!--                 IsEnabled="{Binding SelectedMtpDevice, Converter={x:Static ObjectConverters.IsNotNull}}" -->
+            <!--                 Click="OnScanMtpDevicesButtonClick" -->
+            <!--                 VerticalAlignment="Center" -->
+            <!--             > -->
+            <!--                 <StackPanel Orientation="Horizontal"> -->
+            <!--                     <materialIcons:MaterialIcon Kind="Magnify" /> -->
+            <!--                     <TextBlock IsVisible="{Binding SelectedMtpDevice, Converter={x:Static ObjectConverters.IsNotNull}}">Szukaj urządzeń</TextBlock> -->
+            <!--                     <TextBlock IsVisible="{Binding SelectedMtpDevice, Converter={x:Static ObjectConverters.IsNull}}">Szukam...</TextBlock> -->
+            <!--                 </StackPanel> -->
+            <!--             </Button> -->
+            <!--             <materialIcons:MaterialIcon DockPanel.Dock="Left" Kind="HelpCircleOutline" Width="25" Height="25" VerticalAlignment="Center" Margin="10,0,0,0" /> -->
+            <!--             <TextBlock Margin="10" TextWrapping="Wrap" VerticalAlignment="Center"> -->
+            <!--                 Nie widzisz swojego urządzenia? Upewnij się, że ma poprawną konfigurację USB. Jeżeli to telefon, upewnij się, że został odblokowany. -->
+            <!--             </TextBlock> -->
+            <!--         </DockPanel> -->
+            <!-- <Border -->
+            <!--     DockPanel.Dock="Bottom" -->
+            <!--     Background="#2000" -->
+            <!--     BorderThickness="0,1,0,0" -->
+            <!--     BorderBrush="#1fff" -->
+            <!--     IsVisible="{Binding SelectedMtpDevice, Converter={x:Static ObjectConverters.IsNotNull}}" -->
+            <!--     Padding="10" -->
+            <!-- > -->
+            <!--     <DockPanel VerticalAlignment="Center"> -->
+            <!--         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"> -->
+            <!--             <materialIcons:MaterialIcon Kind="Battery" Width="15" Height="15" VerticalAlignment="Center" /> -->
+            <!--             <TextBlock VerticalAlignment="Center" Text="{Binding SelectedMtpDevice.BatteryLevel}" /> -->
+            <!--             <TextBlock Margin="0,0,15,0" VerticalAlignment="Center">%</TextBlock> -->
+            <!--             <Button Classes="Accent" VerticalAlignment="Center" Click="OnUseThisMtpDeviceButtonClick">Użyj tego urządzenia</Button> -->
+            <!--         </StackPanel> -->
+            <!--         <StackPanel Orientation="Horizontal"> -->
+            <!--             <materialIcons:MaterialIcon Kind="UsbPort" Width="40" Height="40" /> -->
+            <!--             <StackPanel Orientation="Vertical" Margin="5,0,0,0"> -->
+            <!--                 <TextBlock Text="{Binding SelectedMtpDevice.Vendor}" FontSize="19" FontWeight="Bold" /> -->
+            <!--                 <TextBlock Text="{Binding SelectedMtpDevice.ProductName}" Foreground="#9E9E9E" /> -->
+            <!--             </StackPanel> -->
+            <!--         </StackPanel> -->
+            <!--     </DockPanel> -->
+            <!-- </Border> -->
+            <!--         <ListBox -->
+            <!--             Name="MtpDevicesListBox" -->
+            <!--             SelectionMode="Single" -->
+            <!--             Items="{Binding MtpDevicesList}" -->
+            <!--             SelectedItem="{Binding SelectedMtpDevice}" -->
+            <!--             IsVisible="{Binding UsedMtpDevice, Converter={x:Static ObjectConverters.IsNull}}" -->
+            <!--             Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=Width}" -->
+            <!--         > -->
+            <!--             <ListBox.ItemTemplate> -->
+            <!--                 <DataTemplate> -->
+            <!--                     <StackPanel Orientation="Horizontal"> -->
+            <!--                         <materialIcons:MaterialIcon Kind="UsbPort" Width="40" Height="40" /> -->
+            <!--                         <StackPanel Orientation="Vertical" Margin="5,0,0,0"> -->
+            <!--                             <TextBlock Text="{Binding Vendor}" FontSize="19" FontWeight="Bold" /> -->
+            <!--                             <TextBlock Text="{Binding ProductName}" Foreground="#9E9E9E" /> -->
+            <!--                         </StackPanel> -->
+            <!--                     </StackPanel> -->
+            <!--                 </DataTemplate> -->
+            <!--             </ListBox.ItemTemplate> -->
+            <!--         </ListBox> -->
+            <!--          -->
+            <!--         ~1~ Panel visible when an MTP device has been selected @1@ -->
+            <!--         <DockPanel -->
+            <!--             DockPanel.Dock="Left" -->
+            <!--             IsVisible="{Binding UsedMtpDevice, Converter={x:Static ObjectConverters.IsNotNull}}" -->
+            <!--         > -->
+            <!--             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"> -->
+            <!--                 <Button Classes="Flat Accent" Click="OnGoBackToMtpDeviceListButtonClick" Margin="10"> -->
+            <!--                     <StackPanel Orientation="Horizontal"> -->
+            <!--                         <materialIcons:MaterialIcon Kind="ArrowLeft" /> -->
+            <!--                         <TextBlock>Wróć do wyboru urządzeń</TextBlock> -->
+            <!--                     </StackPanel> -->
+            <!--                 </Button> -->
+            <!--             </StackPanel> -->
+            <!--             <StackPanel> -->
+            <!--                 <StackPanel Orientation="Horizontal"> -->
+            <!--                     <materialIcons:MaterialIcon Kind="UsbPort" Width="40" Height="40" /> -->
+            <!--                     <StackPanel Orientation="Vertical" Margin="5,0,0,0"> -->
+            <!--                         <TextBlock Text="{Binding UsedMtpDevice.Vendor}" FontSize="19" FontWeight="Bold" /> -->
+            <!--                         <TextBlock Text="{Binding UsedMtpDevice.ProductName}" Foreground="#9E9E9E" /> -->
+            <!--                     </StackPanel> -->
+            <!--                 </StackPanel> -->
+            <!--                 <StackPanel Orientation="Horizontal" Margin="5"> -->
+            <!--                     <TextBlock VerticalAlignment="Center">Piosenki będą zapisywane do pamięci wewnętrznej w folderze: </TextBlock> -->
+            <!--                     <TextBlock VerticalAlignment="Center" Margin="4,0,0,0" FontFamily="Monospace">YT Offline Music</TextBlock> -->
+            <!--                 </StackPanel> -->
+            <!--             </StackPanel> -->
+            <!--         </DockPanel> -->
+            <!--     </DockPanel> -->
+            <!-- </TabItem> -->
+            
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Vertical">
+                        <materialIcons:MaterialIcon Kind="Cog" Width="25" Height="25" />
+                        <TextBlock>Ustawienia</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <TextBlock>4</TextBlock>
+            </TabItem>
+            
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Vertical">
+                        <materialIcons:MaterialIcon Kind="Update" Width="25" Height="25" />
+                        <TextBlock>Aktualizacje</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <DockPanel>
+                    <Border
+                        DockPanel.Dock="Bottom"
+                        Background="#2000"
+                        BorderThickness="0,1,0,0"
+                        BorderBrush="#1fff"
+                        IsVisible="{Binding SelectedMtpDevice, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        Padding="10"
+                    >
+                        <DockPanel VerticalAlignment="Center">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                <materialIcons:MaterialIcon Kind="Battery" Width="15" Height="15" VerticalAlignment="Center" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding SelectedMtpDevice.BatteryLevel}" />
+                                <TextBlock Margin="0,0,15,0" VerticalAlignment="Center">%</TextBlock>
+                                <Button Classes="Accent" VerticalAlignment="Center" Click="OnUseThisMtpDeviceButtonClick">Użyj tego urządzenia</Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <materialIcons:MaterialIcon Kind="UsbPort" Width="40" Height="40" />
+                                <StackPanel Orientation="Vertical" Margin="5,0,0,0">
+                                    <TextBlock Text="{Binding SelectedMtpDevice.Vendor}" FontSize="19" FontWeight="Bold" />
+                                    <TextBlock Text="{Binding SelectedMtpDevice.ProductName}" Foreground="#9E9E9E" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>                    
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+        <StackPanel
+            Canvas.Left="0"
+            Canvas.Top="0"
+            Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=Width}"
+            Height="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=Height}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#7000"
+            IsVisible="{Binding PopupPromptInfo.IsOpened}"
+        >
+            <Border Background="#373737" Margin="100" CornerRadius="10" BoxShadow="0 0 50 -10 Black">
+                <StackPanel Margin="10" HorizontalAlignment="Center">
+                    <materialIcons:MaterialIcon Kind="{Binding PopupPromptInfo.Icon}" Width="90" Height="90" />
+                    <TextBlock HorizontalAlignment="Center" FontWeight="Black" FontSize="40" Text="{Binding PopupPromptInfo.Title}" />
+                    <TextBlock HorizontalAlignment="Center" Text="{Binding PopupPromptInfo.Text}" />
+                    <TextBox
+                        Width="550"
+                        Watermark="{Binding PopupPromptInfo.Watermark}"
+                        Text="{Binding PopupPromptTextBoxContent}"
+                    />
+                    <TextBlock FontSize="12" FontWeight="Black" Foreground="#F44336" Text="{Binding PopupPromptError}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Classes="Flat Accent" Click="OnPopupPromptCancelButtonClick">Anuluj</Button>
+                        <Button
+                            HorizontalAlignment="Right"
+                            Margin="10,0,0,0"
+                            Content="{Binding PopupPromptInfo.AcceptButtonText}"
+                            Click="OnPopupPromptAcceptButtonClick"
+                            IsEnabled="{Binding PopupPromptTextBoxContent, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                        />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        <Border Canvas.Bottom="0" Canvas.Left="0" Background="#212121" IsVisible="{Binding CurrentOperation.InProgress}" CornerRadius="0,10,0,0">
+            <StackPanel>
+                <TextBlock FontSize="11" Foreground="#424242" Margin="5,5,5,0">Aktualna operacja</TextBlock>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
+                    <materialIcons:MaterialIcon Kind="{Binding CurrentOperation.Icon}" Width="23" Height="23" />
+                    <TextBlock FontWeight="Bold" FontSize="18" Text="{Binding CurrentOperation.Description}" Margin="5,0" />
+                </StackPanel>
+                <ProgressBar
+                    Minimum="0"
+                    Maximum="100"
+                    Value="{Binding CurrentOperationProgress}"
+                    IsIndeterminate="{Binding CurrentOperationProgress, Converter={x:Static ObjectConverters.IsNull}}"
+                />
+            </StackPanel>
+        </Border>
+    </Canvas>
 </UserControl>

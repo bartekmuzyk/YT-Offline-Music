@@ -1,12 +1,70 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:YT_Offline_Music"
+             xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
              x:Class="YT_Offline_Music.App">
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <themes:BundledTheme BaseTheme="Dark" PrimaryColor="Red" SecondaryColor="Blue" />
+    </Application.Resources>
+    
     <Application.Styles>
-        <FluentTheme Mode="Light"/>
+        <StyleInclude Source="avares://Material.Avalonia/Material.Avalonia.Templates.xaml" />
+        <StyleInclude Source="avares://Material.Icons.Avalonia/App.xaml" />
+        
+        <Style Selector="Button">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="assists:ButtonAssist.CornerRadius" Value="16" />
+            <Setter Property="assists:ShadowAssist.ShadowDepth" Value="Depth0" />
+        </Style>
+        
+        <Style Selector="Button.Flat.Accent">
+            <Setter Property="Foreground" Value="#08f" />
+        </Style>
+        
+        <Style Selector="Button TextBlock">
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        
+        <Style Selector="FlyoutPresenter">
+            <Setter Property="Background" Value="#222" />
+        </Style>
+        
+        <Style Selector="StackPanel.menuPanel > Button > StackPanel > material|MaterialIcon">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+        </Style>
+        
+        <Style Selector="StackPanel.menuPanel > Button > StackPanel > TextBlock">
+            <Setter Property="Margin" Value="10,0,0,0" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        
+        <Style Selector="RadioButton, CheckBox">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        
+        <Style Selector="FlyoutPresenter.downloadConfigurationPanel RadioButton">
+            <Setter Property="Margin" Value="0,5,0,0"></Setter>
+        </Style>
+        
+        <Style Selector="FlyoutPresenter.downloadConfigurationPanel CheckBox">
+            <Setter Property="Margin" Value="0,5,0,0"></Setter>
+        </Style>
+        
+        <Style Selector="Button > StackPanel[Orientation=Horizontal] > material|MaterialIcon">
+            <Setter Property="Margin" Value="0,0,5,0" />
+        </Style>
+        
+        <Style Selector="NumericUpDown">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
     </Application.Styles>
 </Application>
