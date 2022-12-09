@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using YT_Offline_Music.GitHub;
 using YT_Offline_Music.GitHub.Models;
@@ -11,13 +12,13 @@ public static class UpdateChecker
     {
         public UpdateCheckerException(string message) : base(message)
         {
-            Console.WriteLine($"UpdateChecker error: {this}");
+            
         }
     }
     
     public const string CURRENT_VERSION_TAG = "v1.0";
 
-    private const string REPO = "szkolny-eu/szkolny-android";
+    private const string REPO = "bartekmuzyk/YT-Offline-Music";
     
     #if DEBUG
     private static readonly Client gitHubClient = new(Secrets.Get("github_access_token"));

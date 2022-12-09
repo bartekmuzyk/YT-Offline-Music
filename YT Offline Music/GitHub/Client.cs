@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using YT_Offline_Music.GitHub.Models;
+using YT_Offline_Music.Utils;
 
 namespace YT_Offline_Music.GitHub;
 
@@ -16,8 +17,9 @@ public class Client
     public Client(string accessToken)
     {
         httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Add("accept", "application/vnd.github+json");
-        httpClient.DefaultRequestHeaders.Add("authorization", $"Bearer {accessToken}");
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "bartekmuzyk/YT-Offline-Music");
         httpClient.BaseAddress = new Uri("https://api.github.com");
     }
 
@@ -30,7 +32,7 @@ public class Client
         queryParams.Add("page", page.ToString());
         
         var response = await httpClient.GetStringAsync($"/repos/{repo}/releases?{queryParams}");
-        
+
         return JsonSerializer.Deserialize<Release[]>(response)!;
     } 
 }

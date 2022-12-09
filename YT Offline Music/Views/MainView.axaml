@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:YT_Offline_Music.ViewModels"
              xmlns:cc="using:YT_Offline_Music.CustomControls"
+             xmlns:uc="using:YT_Offline_Music.Utils"
+             xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -112,11 +114,11 @@
                                                         <CheckBox IsChecked="{Binding DownloadConfiguration.SendViaFtp}">Serwer FTP</CheckBox>
                                                         <!-- <CheckBox IsChecked="{Binding DownloadConfiguration.SendViaMtp}">Urządzenie MTP</CheckBox> -->
                                                         
-                                                        <StackPanel Orientation="Horizontal" Margin="0,15,0,5">
-                                                            <materialIcons:MaterialIcon Foreground="White" Kind="AutoFix" Width="25" Height="25" Margin="0,0,10,0" />
-                                                            <TextBlock Foreground="White" FontWeight="Bold" FontSize="20">Dodatkowe operacje</TextBlock>
-                                                        </StackPanel>
-                                                        <CheckBox IsChecked="{Binding DownloadConfiguration.CreateZipArchive}">Spakuj do archiwum .zip</CheckBox>
+                                                        <!-- <StackPanel Orientation="Horizontal" Margin="0,15,0,5"> -->
+                                                        <!--     <materialIcons:MaterialIcon Foreground="White" Kind="AutoFix" Width="25" Height="25" Margin="0,0,10,0" /> -->
+                                                        <!--     <TextBlock Foreground="White" FontWeight="Bold" FontSize="20">Dodatkowe operacje</TextBlock> -->
+                                                        <!-- </StackPanel> -->
+                                                        <!-- <CheckBox IsChecked="{Binding DownloadConfiguration.CreateZipArchive}">Spakuj do archiwum .zip</CheckBox> -->
                                                         
                                                         <Border BorderBrush="LightGray" BorderThickness="0,1,0,0" Margin="0,20,0,0">
                                                             <StackPanel Orientation="Horizontal">
@@ -365,16 +367,6 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Vertical">
-                        <materialIcons:MaterialIcon Kind="Cog" Width="25" Height="25" />
-                        <TextBlock>Ustawienia</TextBlock>
-                    </StackPanel>
-                </TabItem.Header>
-                <TextBlock>4</TextBlock>
-            </TabItem>
-            
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Vertical">
                         <materialIcons:MaterialIcon Kind="Update" Width="25" Height="25" />
                         <TextBlock>Aktualizacje</TextBlock>
                     </StackPanel>
@@ -385,25 +377,43 @@
                         Background="#2000"
                         BorderThickness="0,1,0,0"
                         BorderBrush="#1fff"
-                        IsVisible="{Binding SelectedMtpDevice, Converter={x:Static ObjectConverters.IsNotNull}}"
                         Padding="10"
                     >
                         <DockPanel VerticalAlignment="Center">
                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                <materialIcons:MaterialIcon Kind="Battery" Width="15" Height="15" VerticalAlignment="Center" />
-                                <TextBlock VerticalAlignment="Center" Text="{Binding SelectedMtpDevice.BatteryLevel}" />
-                                <TextBlock Margin="0,0,15,0" VerticalAlignment="Center">%</TextBlock>
-                                <Button Classes="Accent" VerticalAlignment="Center" Click="OnUseThisMtpDeviceButtonClick">Użyj tego urządzenia</Button>
+                                <Button Classes="Accent" VerticalAlignment="Center" Click="OnCheckUpdatesButtonClick" IsEnabled="{Binding !CheckingForUpdates}">
+                                    Sprawdź aktualizacje
+                                </Button>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <materialIcons:MaterialIcon Kind="UsbPort" Width="40" Height="40" />
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding CheckingForUpdates}">
+                                <materialIcons:MaterialIcon Kind="TimerSandFull" Width="40" Height="40" />
                                 <StackPanel Orientation="Vertical" Margin="5,0,0,0">
-                                    <TextBlock Text="{Binding SelectedMtpDevice.Vendor}" FontSize="19" FontWeight="Bold" />
-                                    <TextBlock Text="{Binding SelectedMtpDevice.ProductName}" Foreground="#9E9E9E" />
+                                    <TextBlock Text="Sprawdzanie aktualizacji..." FontSize="19" FontWeight="Bold" />
+                                    <TextBlock Text=" " Foreground="#9E9E9E" />
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" IsVisible="{Binding !CheckingForUpdates}">
+                                <materialIcons:MaterialIcon Kind="Update" Width="40" Height="40" />
+                                <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNull}}" Orientation="Vertical" Margin="5,0,0,0">
+                                    <TextBlock Text="{x:Static uc:UpdateChecker.CURRENT_VERSION_TAG}" FontSize="19" FontWeight="Bold" />
+                                    <TextBlock Text="Aktualna wersja" Foreground="#9E9E9E" />
+                                </StackPanel>
+                                <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNotNull}}" Orientation="Vertical" Margin="5,0,0,0">
+                                    <TextBlock Text="Dostępna nowa wersja!" FontSize="19" FontWeight="Bold" />
+                                    <TextBlock Text="Możesz rozpocząć aktualizację przyciskiem po prawej, lub pominąć to wydanie" Foreground="#9E9E9E" />
                                 </StackPanel>
                             </StackPanel>
                         </DockPanel>
-                    </Border>                    
+                    </Border>
+                    <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNull}}" Margin="5">
+                        <TextBlock FontSize="26" FontWeight="Bold">Nie ma nowych aktualizacji</TextBlock>
+                        <TextBlock>Sprawdź aktualizacje za pomocą przycisku na dole, aby zobaczyć, czy nie omijają cię najnowsze funkcje i poprawki!</TextBlock>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNotNull}}" Margin="5,5,5,0">
+                        <TextBlock FontSize="26" FontWeight="Bold" Text="{Binding AvailableUpdateRelease.Name}" />
+                        <TextBlock FontSize="11" Margin="0,0,0,10" Foreground="#6fff" Text="{Binding AvailableUpdateRelease.TagName}" />
+                        <md:MarkdownScrollViewer Markdown="{Binding AvailableUpdateRelease.Body}" />
+                    </StackPanel>
                 </DockPanel>
             </TabItem>
         </TabControl>

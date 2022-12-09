@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -87,8 +89,11 @@ public static class YouTubeDownloader
             
             onPlaylistProgress(processedVideoCount);
 
-            foreach (var video in videos)
+            for (var i = 0; i < videos.Count; i++)
             {
+                var video = videos[i];
+                var trackNumber = (uint)(i + 1);
+                
                 var task = Task.Run(async () =>
                 {
                     var targetMp3FilePath = Path.Join(destinationDirectoryPath, $"{video.VideoId}.mp3");
@@ -129,18 +134,27 @@ public static class YouTubeDownloader
                     // Download thumbnail
                     Console.WriteLine($"{video.VideoId}: Downloading thumbnail");
                     var tempThumbPath = $"tmp/{video.VideoId}.jpg";
-                    var thumbResponse = await httpClient.GetStreamAsync(video.ThumbnailUrl);
-                    await using (Stream thumbFileOutput = File.OpenWrite(tempThumbPath))
-                    {
-                        await thumbResponse.CopyToAsync(thumbFileOutput);                        
-                    }
+                    var thumbResponseStream = await httpClient.GetStreamAsync(video.ThumbnailUrl);
 
+                    using (var croppedThumbBitmap = new Bitmap(480, 270))
+                    {
+                        var thumbBitmap = new Bitmap(Image.FromStream(thumbResponseStream));
+                        
+                        using (var g = Graphics.FromImage(croppedThumbBitmap))
+                        {
+                            g.DrawImage(thumbBitmap, 0, -45);
+                        }
+                        
+                        croppedThumbBitmap.Save(tempThumbPath, ImageFormat.Jpeg);
+                    }
+                    
                     // Set MP3 tags
                     Console.WriteLine($"{video.VideoId}: Setting tags");
                     using (var file = TagLib.File.Create(tempMp3Path))
                     {
                         file.Tag.Title = video.Title;
                         file.Tag.Album = playlistName;
+                        file.Tag.AlbumArtists = new[] { "YouTube" };
                         file.Tag.Performers = new[] { video.Channel };
                         file.Tag.Pictures = new IPicture[]
                         {
@@ -150,6 +164,7 @@ public static class YouTubeDownloader
                                 MimeType = MediaTypeNames.Image.Jpeg
                             }
                         };
+                        file.Tag.Track = trackNumber;
 
                         file.Save();
                     }
@@ -159,9 +174,11 @@ public static class YouTubeDownloader
                     File.Copy(tempMp3Path, targetMp3FilePath, true);
 
                     // Clean up
+                    #if !DEBUG
                     Console.WriteLine("Cleaning up.");
                     foreach (var filename in new[] { tempThumbPath, tempWebmPath, tempMp3Path })
                         File.Delete(filename);
+                    #endif
 
                     downloadedVideoIds.Add(video.VideoId);
                     onPlaylistProgress(downloadedVideoIds.Count);

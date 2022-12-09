@@ -16,6 +16,7 @@ using Material.Icons;
 using MessageBox.Avalonia.Enums;
 using YT_Offline_Music.CustomControls;
 using YT_Offline_Music.Extensions;
+using YT_Offline_Music.GitHub.Models;
 using YT_Offline_Music.Models;
 using YT_Offline_Music.Persistence;
 using YT_Offline_Music.Persistence.Types;
@@ -639,5 +640,48 @@ public partial class MainView : UserControl
         var vm = this.GetViewModel<MainViewModel>();
 
         vm.UsedMtpDevice = null;
+    }
+
+    private void OnCheckUpdatesButtonClick(object? sender, RoutedEventArgs e)
+    {
+        var vm = this.GetViewModel<MainViewModel>();
+
+        vm.CheckingForUpdates = true;
+
+        var updateCheckTask = UpdateChecker.CheckIfUpdateIsAvailable();
+        updateCheckTask.GetAwaiter().OnCompleted(() =>
+        {
+            Release? release;
+
+            try
+            {
+                release = updateCheckTask.Result;
+            }
+            catch (AggregateException aggregateException)
+            {
+                Console.WriteLine($"UpdateChecker error: {aggregateException.GetBaseException()}");
+                SimpleMessageBox.Alert(
+                    "Błąd sprawdzania aktualizacji",
+                    "Nie udało się sprawdzić aktualizacji. Sprawdź połączenie z internetem i spróbuj ponownie później.",
+                    Icon.Error
+                );
+                return;
+            }
+            finally
+            {
+                vm.CheckingForUpdates = false;
+            }
+
+            vm.AvailableUpdateRelease = release;
+            
+            if (release == null)
+            {
+                SimpleMessageBox.Alert(
+                    "Brak aktualizacji",
+                    "Posiadasz najnowszą wersję oprogramowania.",
+                    Icon.Success
+                );
+            }
+        });
     }
 }

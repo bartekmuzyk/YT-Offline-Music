@@ -156,32 +156,21 @@ public class MainViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref usedMtpDevice, value);
     }
 
-    public enum UpdateAvailabilityState
+
+    private bool checkingForUpdates;
+
+    public bool CheckingForUpdates
     {
-        DidntCheckYet,
-        Checking,
-        NoneAvailable,
-        Available
+        get => checkingForUpdates;
+        set => this.RaiseAndSetIfChanged(ref checkingForUpdates, value);
     }
 
-    private UpdateAvailabilityState updateAvailability = UpdateAvailabilityState.DidntCheckYet;
+    private Release? availableUpdateRelease;
 
-    public UpdateAvailabilityState UpdateAvailability
+    public Release? AvailableUpdateRelease
     {
-        get => updateAvailability;
-        set => this.RaiseAndSetIfChanged(ref updateAvailability, value);
-    }
-
-    public bool CheckedForUpdates => UpdateAvailability is UpdateAvailabilityState.NoneAvailable or UpdateAvailabilityState.Available;
-
-    public bool CheckingForUpdates => UpdateAvailability == UpdateAvailabilityState.Checking;
-
-    private Release? availableUpdates;
-
-    public Release? AvailableUpdates
-    {
-        get => availableUpdates;
-        set => this.RaiseAndSetIfChanged(ref availableUpdates, value);
+        get => availableUpdateRelease;
+        set => this.RaiseAndSetIfChanged(ref availableUpdateRelease, value);
     }
 
     public MainViewModel()
