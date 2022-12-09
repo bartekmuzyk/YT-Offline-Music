@@ -364,58 +364,58 @@
             <!--     </DockPanel> -->
             <!-- </TabItem> -->
             
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Vertical">
-                        <materialIcons:MaterialIcon Kind="Update" Width="25" Height="25" />
-                        <TextBlock>Aktualizacje</TextBlock>
-                    </StackPanel>
-                </TabItem.Header>
-                <DockPanel>
-                    <Border
-                        DockPanel.Dock="Bottom"
-                        Background="#2000"
-                        BorderThickness="0,1,0,0"
-                        BorderBrush="#1fff"
-                        Padding="10"
-                    >
-                        <DockPanel VerticalAlignment="Center">
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                <Button Classes="Accent" VerticalAlignment="Center" Click="OnCheckUpdatesButtonClick" IsEnabled="{Binding !CheckingForUpdates}">
-                                    Sprawdź aktualizacje
-                                </Button>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" IsVisible="{Binding CheckingForUpdates}">
-                                <materialIcons:MaterialIcon Kind="TimerSandFull" Width="40" Height="40" />
-                                <StackPanel Orientation="Vertical" Margin="5,0,0,0">
-                                    <TextBlock Text="Sprawdzanie aktualizacji..." FontSize="19" FontWeight="Bold" />
-                                    <TextBlock Text=" " Foreground="#9E9E9E" />
-                                </StackPanel>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" IsVisible="{Binding !CheckingForUpdates}">
-                                <materialIcons:MaterialIcon Kind="Update" Width="40" Height="40" />
-                                <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNull}}" Orientation="Vertical" Margin="5,0,0,0">
-                                    <TextBlock Text="{x:Static uc:UpdateChecker.CURRENT_VERSION_TAG}" FontSize="19" FontWeight="Bold" />
-                                    <TextBlock Text="Aktualna wersja" Foreground="#9E9E9E" />
-                                </StackPanel>
-                                <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNotNull}}" Orientation="Vertical" Margin="5,0,0,0">
-                                    <TextBlock Text="Dostępna nowa wersja!" FontSize="19" FontWeight="Bold" />
-                                    <TextBlock Text="Możesz rozpocząć aktualizację przyciskiem po prawej, lub pominąć to wydanie" Foreground="#9E9E9E" />
-                                </StackPanel>
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-                    <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNull}}" Margin="5">
-                        <TextBlock FontSize="26" FontWeight="Bold">Nie ma nowych aktualizacji</TextBlock>
-                        <TextBlock>Sprawdź aktualizacje za pomocą przycisku na dole, aby zobaczyć, czy nie omijają cię najnowsze funkcje i poprawki!</TextBlock>
-                    </StackPanel>
-                    <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNotNull}}" Margin="5,5,5,0">
-                        <TextBlock FontSize="26" FontWeight="Bold" Text="{Binding AvailableUpdateRelease.Name}" />
-                        <TextBlock FontSize="11" Margin="0,0,0,10" Foreground="#6fff" Text="{Binding AvailableUpdateRelease.TagName}" />
-                        <md:MarkdownScrollViewer Markdown="{Binding AvailableUpdateRelease.Body}" />
-                    </StackPanel>
-                </DockPanel>
-            </TabItem>
+            <!-- <TabItem> -->
+            <!--     <TabItem.Header> -->
+            <!--         <StackPanel Orientation="Vertical"> -->
+            <!--             <materialIcons:MaterialIcon Kind="Update" Width="25" Height="25" /> -->
+            <!--             <TextBlock>Aktualizacje</TextBlock> -->
+            <!--         </StackPanel> -->
+            <!--     </TabItem.Header> -->
+            <!--     <DockPanel> -->
+            <!--         <Border -->
+            <!--             DockPanel.Dock="Bottom" -->
+            <!--             Background="#2000" -->
+            <!--             BorderThickness="0,1,0,0" -->
+            <!--             BorderBrush="#1fff" -->
+            <!--             Padding="10" -->
+            <!--         > -->
+            <!--             <DockPanel VerticalAlignment="Center"> -->
+            <!--                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"> -->
+            <!--                     <Button Classes="Accent" VerticalAlignment="Center" Click="OnCheckUpdatesButtonClick" IsEnabled="{Binding !CheckingForUpdates}"> -->
+            <!--                         Sprawdź aktualizacje -->
+            <!--                     </Button> -->
+            <!--                 </StackPanel> -->
+            <!--                 <StackPanel Orientation="Horizontal" IsVisible="{Binding CheckingForUpdates}"> -->
+            <!--                     <materialIcons:MaterialIcon Kind="TimerSandFull" Width="40" Height="40" /> -->
+            <!--                     <StackPanel Orientation="Vertical" Margin="5,0,0,0"> -->
+            <!--                         <TextBlock Text="Sprawdzanie aktualizacji..." FontSize="19" FontWeight="Bold" /> -->
+            <!--                         <TextBlock Text=" " Foreground="#9E9E9E" /> -->
+            <!--                     </StackPanel> -->
+            <!--                 </StackPanel> -->
+            <!--                 <StackPanel Orientation="Horizontal" IsVisible="{Binding !CheckingForUpdates}"> -->
+            <!--                     <materialIcons:MaterialIcon Kind="Update" Width="40" Height="40" /> -->
+            <!--                     <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNull}}" Orientation="Vertical" Margin="5,0,0,0"> -->
+            <!--                         <TextBlock Text="{x:Static uc:UpdateChecker.CURRENT_VERSION_TAG}" FontSize="19" FontWeight="Bold" /> -->
+            <!--                         <TextBlock Text="Aktualna wersja" Foreground="#9E9E9E" /> -->
+            <!--                     </StackPanel> -->
+            <!--                     <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNotNull}}" Orientation="Vertical" Margin="5,0,0,0"> -->
+            <!--                         <TextBlock Text="Dostępna nowa wersja!" FontSize="19" FontWeight="Bold" /> -->
+            <!--                         <TextBlock Text="Możesz rozpocząć aktualizację przyciskiem po prawej, lub pominąć to wydanie" Foreground="#9E9E9E" /> -->
+            <!--                     </StackPanel> -->
+            <!--                 </StackPanel> -->
+            <!--             </DockPanel> -->
+            <!--         </Border> -->
+            <!--         <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNull}}" Margin="5"> -->
+            <!--             <TextBlock FontSize="26" FontWeight="Bold">Nie ma nowych aktualizacji</TextBlock> -->
+            <!--             <TextBlock>Sprawdź aktualizacje za pomocą przycisku na dole, aby zobaczyć, czy nie omijają cię najnowsze funkcje i poprawki!</TextBlock> -->
+            <!--         </StackPanel> -->
+            <!--         <StackPanel IsVisible="{Binding AvailableUpdateRelease, Converter={x:Static ObjectConverters.IsNotNull}}" Margin="5,5,5,0"> -->
+            <!--             <TextBlock FontSize="26" FontWeight="Bold" Text="{Binding AvailableUpdateRelease.Name}" /> -->
+            <!--             <TextBlock FontSize="11" Margin="0,0,0,10" Foreground="#6fff" Text="{Binding AvailableUpdateRelease.TagName}" /> -->
+            <!--             <md:MarkdownScrollViewer Markdown="{Binding AvailableUpdateRelease.Body}" /> -->
+            <!--         </StackPanel> -->
+            <!--     </DockPanel> -->
+            <!-- </TabItem> -->
         </TabControl>
         <StackPanel
             Canvas.Left="0"
