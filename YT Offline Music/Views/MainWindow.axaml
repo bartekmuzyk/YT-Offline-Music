@@ -7,7 +7,7 @@
         Width="800"
         Height="450"
         x:Class="YT_Offline_Music.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/icon.ico"
         Title="YT Offline Music"
         Content="{Binding Content}">
     <Design.DataContext>
