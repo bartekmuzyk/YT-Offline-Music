@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
-using System.Threading;
 using System.Threading.Tasks;
 using Mono.Unix;
 using TagLib;
@@ -14,7 +13,6 @@ using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
-using YT_Offline_Music.Extensions;
 using YT_Offline_Music.YouTube.Models;
 using File = System.IO.File;
 
@@ -136,16 +134,9 @@ public static class YouTubeDownloader
                     var tempThumbPath = $"tmp/{video.VideoId}.jpg";
                     var thumbResponseStream = await httpClient.GetStreamAsync(video.ThumbnailUrl);
 
-                    using (var croppedThumbBitmap = new Bitmap(480, 270))
+                    await using (var thumbFileStream = File.OpenWrite(tempThumbPath))
                     {
-                        var thumbBitmap = new Bitmap(Image.FromStream(thumbResponseStream));
-                        
-                        using (var g = Graphics.FromImage(croppedThumbBitmap))
-                        {
-                            g.DrawImage(thumbBitmap, 0, -45);
-                        }
-                        
-                        croppedThumbBitmap.Save(tempThumbPath, ImageFormat.Jpeg);
+                        await thumbResponseStream.CopyToAsync(thumbFileStream);
                     }
                     
                     // Set MP3 tags
