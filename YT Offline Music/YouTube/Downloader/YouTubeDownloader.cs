@@ -136,16 +136,9 @@ public static class YouTubeDownloader
                     var tempThumbPath = $"tmp/{video.VideoId}.jpg";
                     var thumbResponseStream = await httpClient.GetStreamAsync(video.ThumbnailUrl);
 
-                    using (var croppedThumbBitmap = new Bitmap(480, 270))
+                    await using (var thumbFileWriteStream = File.OpenWrite(tempThumbPath))
                     {
-                        var thumbBitmap = new Bitmap(Image.FromStream(thumbResponseStream));
-                        
-                        using (var g = Graphics.FromImage(croppedThumbBitmap))
-                        {
-                            g.DrawImage(thumbBitmap, 0, -45);
-                        }
-                        
-                        croppedThumbBitmap.Save(tempThumbPath, ImageFormat.Jpeg);
+                        await thumbResponseStream.CopyToAsync(thumbFileWriteStream);
                     }
                     
                     // Set MP3 tags
