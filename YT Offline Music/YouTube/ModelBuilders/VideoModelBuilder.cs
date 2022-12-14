@@ -11,7 +11,7 @@ public static class VideoModelBuilder
         {
             VideoId = source.Snippet.ResourceId.VideoId,
             Title = source.Snippet.Title,
-            ThumbnailUrl = source.Snippet.Thumbnails.High.Url,
+            ThumbnailUrl = source.Snippet.Thumbnails.Medium.Url,
             Channel = source.Snippet.VideoOwnerChannelTitle
         };
     }
